@@ -1,12 +1,7 @@
 package txs
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
-	"image"
-	"image/jpeg"
-	"os"
 
 	"github.com/celestiaorg/celestia-app/app"
 	"github.com/celestiaorg/celestia-app/x/payment/types"
@@ -15,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
+	tmrand "github.com/tendermint/tendermint/libs/rand"
 	coretypes "github.com/tendermint/tendermint/types"
 )
 
@@ -28,33 +24,38 @@ func PayForPhotoCmd() *cobra.Command {
 				return err
 			}
 
-			path, err := cmd.Flags().GetString("path")
-			if err != nil {
-				return err
-			}
+			// path, err := cmd.Flags().GetString("path")
+			// if err != nil {
+			// 	return err
+			// }
 
-			if path == "" {
-				return errors.New("empty path, pls use path flag")
-			}
+			// if path == "" {
+			// 	return errors.New("empty path, pls use path flag")
+			// }
 
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
+			// file, err := os.Open(path)
+			// if err != nil {
+			// 	return err
+			// }
+			// defer file.Close()
 
-			img, _, err := image.Decode(file)
-			if err != nil {
-				return err
-			}
+			// img, _, err := image.Decode(file)
+			// if err != nil {
+			// 	return err
+			// }
 
-			buf := bytes.NewBuffer([]byte{})
+			// buf := bytes.NewBuffer([]byte{})
 
-			err = jpeg.Encode(buf, img, nil)
-			if err != nil {
-				return err
-			}
+			// err = jpeg.Encode(buf, img, nil)
+			// if err != nil {
+			// 	return err
+			// }
 
-			txs, err := specificSignedWirePayForDataTxs(cctx, cctx.TxConfig, cctx.Keyring, buf.Bytes())
+			// imageBytes := buf.Bytes()
+			// copyImageBytes := make([]byte, len(imageBytes))
+			// copy(copyImageBytes, imageBytes)
+
+			txs, err := specificSignedWirePayForDataTxs(cctx, cctx.TxConfig, cctx.Keyring, tmrand.Bytes(10000))
 			if err != nil {
 				return err
 			}
@@ -88,31 +89,31 @@ func specificSignedWirePayForDataTxs(clientCtx client.Context, txConfig client.T
 	const maxMsgSize = 500000
 	chunks := chunkSlice(b, maxMsgSize)
 	txs := make([]coretypes.Tx, len(chunks))
-	controlAcc, err := clientCtx.Keyring.Key("actor-98")
+	// controlAcc, err := clientCtx.Keyring.Key("actor-97")
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// controlAddr, err := controlAcc.GetAddress()
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	signer := types.NewKeyringSigner(clientCtx.Keyring, "actor-95", clientCtx.ChainID)
+
+	err := signer.UpdateAccountFromClient(clientCtx)
 	if err != nil {
 		return nil, err
 	}
 
-	controlAddr, err := controlAcc.GetAddress()
-	if err != nil {
-		return nil, err
-	}
-
-	signer := types.NewKeyringSigner(clientCtx.Keyring, "actor-98", clientCtx.ChainID)
-
-	err = signer.UpdateAccountFromClient(clientCtx)
-	if err != nil {
-		return nil, err
-	}
-
-	_, sequence, err := clientCtx.AccountRetriever.GetAccountNumberSequence(clientCtx, controlAddr)
-	if err != nil {
-		return nil, err
-	}
+	// _, sequence, err := clientCtx.AccountRetriever.GetAccountNumberSequence(clientCtx, controlAddr)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	for i, chunk := range chunks {
 
-		signer.SetSequence(sequence)
+		// signer.SetSequence(sequence)
 
 		coin := sdk.Coin{
 			Denom:  app.BondDenom,
@@ -154,7 +155,7 @@ func specificSignedWirePayForDataTxs(clientCtx client.Context, txConfig client.T
 		}
 
 		txs[i] = coretypes.Tx(rawTx)
-		sequence++
+		// sequence++
 	}
 
 	return txs, nil

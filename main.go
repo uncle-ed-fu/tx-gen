@@ -4,13 +4,18 @@ import (
 	"context"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/celestiaorg/celestia-app/app"
 	"github.com/celestiaorg/celestia-app/app/encoding"
 	"github.com/pomifer/tx-gen/cmd/accounts"
 	"github.com/pomifer/tx-gen/cmd/fund"
+	"github.com/pomifer/tx-gen/cmd/history"
 	"github.com/pomifer/tx-gen/cmd/txs"
 	"github.com/tendermint/tendermint/libs/cli"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
@@ -21,8 +26,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var defaultKeyHome string
+
+func init() {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+
+	defaultKeyHome = filepath.Join(userHomeDir, ".tx-gen")
+}
+
 func main() {
-	defaultNodeHome := "/home/evan/.tx-gen"
 
 	encodingConfig := encoding.MakeEncodingConfig(app.ModuleEncodingRegisters...)
 
@@ -40,7 +55,7 @@ func main() {
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
 		WithBroadcastMode(flags.BroadcastBlock).
-		WithHomeDir(defaultNodeHome).
+		WithHomeDir(defaultKeyHome).
 		WithViper("TX-GEN")
 
 	rootCmd := &cobra.Command{
@@ -56,12 +71,26 @@ func main() {
 				return err
 			}
 
+			node, err := cmd.Flags().GetString("node")
+			if err != nil {
+				return err
+			}
+
 			rpcClient, err := client.NewClientFromNode("tcp://localhost:26657")
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			initClientCtx = initClientCtx.WithClient(rpcClient)
+			node = strings.Replace(node, "26657", "9090", 1)
+			node = strings.Replace(node, "tcp://", "", 1)
+
+			grpcClient, err := grpc.Dial(node, grpc.WithTransportCredentials(insecure.NewCredentials()))
+			if err != nil {
+				return err
+			}
+
+			initClientCtx = initClientCtx.WithClient(rpcClient).
+				WithGRPCClient(grpcClient)
 			// WithKeyring(kr)
 
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
@@ -75,8 +104,8 @@ func main() {
 	rootCmd.PersistentFlags().String(flags.FlagNode, "tcp://localhost:26657", "")
 	rootCmd.PersistentFlags().String(flags.FlagChainID, "mamaki", "")
 
-	rootCmd.PersistentFlags().String(flags.FlagHome, defaultNodeHome, "The application home directory")
-	rootCmd.PersistentFlags().String(flags.FlagKeyringDir, defaultNodeHome, "The client Keyring directory; if omitted, the default 'home' directory will be used")
+	rootCmd.PersistentFlags().String(flags.FlagHome, defaultKeyHome, "The application home directory")
+	rootCmd.PersistentFlags().String(flags.FlagKeyringDir, defaultKeyHome, "The client Keyring directory; if omitted, the default 'home' directory will be used")
 	rootCmd.PersistentFlags().String(flags.FlagKeyringBackend, "file", "Select keyring's backend (os|file|test)")
 	rootCmd.PersistentFlags().String(cli.OutputFlag, "text", "Output format (text|json)")
 
@@ -84,8 +113,9 @@ func main() {
 		accounts.InitCmd(),
 		fund.FundCmd(),
 		txs.GenPayForDataCmd(),
-		keys.Commands("/home/evan/.tx-gen/"),
+		keys.Commands(defaultKeyHome),
 		txs.PayForPhotoCmd(),
+		history.HistoryCmd(),
 	)
 
 	ctx := context.Background()
