@@ -40,7 +40,7 @@ func BlockTimeCmd() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				fmt.Printf("%s\n", valMap[valAddr.String()])
+				fmt.Printf("%d - %d - %s\n", res.Header.Height, res.Header.Time.UnixMilli(), valMap[valAddr.String()])
 			}
 
 			return nil
