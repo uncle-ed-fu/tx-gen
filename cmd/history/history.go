@@ -1,6 +1,9 @@
 package history
 
 import (
+	"encoding/json"
+	"io/ioutil"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 )
@@ -21,9 +24,18 @@ func HistoryCmd() *cobra.Command {
 	command.PersistentFlags().Int64(EndFlag, -1, "last block to query")
 	command.PersistentFlags().String(SaveFlag, "", "path to save json file to")
 
-	command.AddCommand(BlockTimeCmd())
+	command.AddCommand(BlockSummaryCmd())
 
 	return command
+}
+
+func saveJson(fileName string, data interface{}) error {
+	file, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(fileName, file, 0644)
 }
 
 func readStartEndFlags(cmd *cobra.Command, cctx client.Context) (start, end int64, err error) {

@@ -11,9 +11,14 @@ replace (
 
 require (
 	github.com/celestiaorg/celestia-app v0.5.1
+	github.com/celestiaorg/nmt v0.8.0
 	github.com/cosmos/cosmos-sdk v0.46.0-beta2.0.20220418184507-c53157dd63f6
 	github.com/spf13/cobra v1.4.0
+	github.com/tendermint/tendermint v0.35.4
+	google.golang.org/grpc v1.46.0
 )
+
+replace github.com/tendermint/tendermint => github.com/celestiaorg/celestia-core v0.35.0-dev.0.20220228062426-721562a3544d
 
 require (
 	cloud.google.com/go v0.100.2 // indirect
@@ -31,7 +36,6 @@ require (
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/celestiaorg/go-leopard v0.1.0 // indirect
 	github.com/celestiaorg/merkletree v0.0.0-20210714075610-a84dc3ddbbe4 // indirect
-	github.com/celestiaorg/nmt v0.8.0 // indirect
 	github.com/celestiaorg/rsmt2d v0.5.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
@@ -99,6 +103,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
+	github.com/montanaflynn/stats v0.6.6 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20210609091139-0a56a4bca00b // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
@@ -127,7 +132,6 @@ require (
 	github.com/tendermint/btcd v0.1.1 // indirect
 	github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15 // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
-	github.com/tendermint/tendermint v0.35.4 // indirect
 	github.com/tendermint/tm-db v0.6.7 // indirect
 	github.com/ulikunitz/xz v0.5.8 // indirect
 	github.com/vivint/infectious v0.0.0-20200605153912-25a574ae18a3 // indirect
@@ -145,7 +149,6 @@ require (
 	google.golang.org/api v0.74.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac // indirect
-	google.golang.org/grpc v1.46.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
