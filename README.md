@@ -20,9 +20,12 @@ send funds to all those accounts you just generated.
 tx-gen fund --node tcp://my.node.ip.here:26657
 ```
 
+query basic onchain data and save it to a json
+
 ```
-tx-gen history time --start 3000 --node tcp://my.node.ip.here:26657
+tx-gen history summary --start 3000 --node tcp://my.node.ip.here:26657
 ```
+
 still need to debug why the signature fails sometimes, but the data ends up on chain and you still have to pay for gas
 ```
 tx-gen photo --node tcp://my.node.ip.here:26657 --path /path/to/photo/photo.jpg
