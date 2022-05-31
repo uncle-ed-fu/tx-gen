@@ -1,4 +1,4 @@
-package history
+package query
 
 import (
 	"sort"
@@ -37,7 +37,7 @@ type ChainSummary struct {
 	ProposerTally        map[string]uint
 }
 
-func parseSigners(valNames map[string]string, block *coretypes.Block) (map[string]bool, int64) {
+func ParseSigners(valNames map[string]string, block *coretypes.Block) (map[string]bool, int64) {
 	out := make(map[string]bool)
 	missedSigners := int64(0)
 	for _, sig := range block.LastCommit.Signatures {

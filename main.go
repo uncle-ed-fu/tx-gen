@@ -12,6 +12,7 @@ import (
 	"github.com/pomifer/tx-gen/cmd/accounts"
 	"github.com/pomifer/tx-gen/cmd/fund"
 	"github.com/pomifer/tx-gen/cmd/history"
+	"github.com/pomifer/tx-gen/cmd/profile"
 	"github.com/pomifer/tx-gen/cmd/txs"
 	"github.com/tendermint/tendermint/libs/cli"
 	"google.golang.org/grpc"
@@ -116,6 +117,7 @@ func main() {
 		keys.Commands(defaultKeyHome),
 		txs.PayForPhotoCmd(),
 		history.HistoryCmd(),
+		profile.ProfileCmd(),
 	)
 
 	ctx := context.Background()

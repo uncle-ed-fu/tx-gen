@@ -8,8 +8,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/query"
+	cosmosquery "github.com/cosmos/cosmos-sdk/types/query"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/pomifer/tx-gen/query"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,7 @@ func BlockSummaryCmd() *cobra.Command {
 				return err
 			}
 
-			summaries := []BlockSummary{}
+			summaries := []query.BlockSummary{}
 			for i := start; i < end; i++ {
 				res, err := cctx.Client.Block(cmd.Context(), &i)
 				if err != nil {
@@ -55,9 +56,9 @@ func BlockSummaryCmd() *cobra.Command {
 					valName = valAddr.String()
 				}
 
-				signers, missedSigners := parseSigners(valMap, res.Block)
+				signers, missedSigners := query.ParseSigners(valMap, res.Block)
 
-				bs := BlockSummary{
+				bs := query.BlockSummary{
 					Height:        res.Block.Height,
 					Proposer:      valName,
 					Signers:       signers,
@@ -70,7 +71,7 @@ func BlockSummaryCmd() *cobra.Command {
 				fmt.Printf("%d - %d - %s\n", res.Block.Height, res.Block.Time.UnixMilli(), valName)
 			}
 
-			overallSummary, summaries := SummarizeBlocks(summaries...)
+			overallSummary, summaries := query.SummarizeBlocks(summaries...)
 			fmt.Printf(
 				"avg %.2f median %.2f stdDev %.2f shortest %.2f longest %.2f\n",
 				overallSummary.AverageBlockTime,
@@ -96,7 +97,7 @@ func queryValidators(ctx context.Context, cctx client.Context) (map[string]strin
 
 	valResp, err := sqc.Validators(ctx, &stakingtypes.QueryValidatorsRequest{
 		Status: stakingtypes.BondStatusBonded,
-		Pagination: &query.PageRequest{
+		Pagination: &cosmosquery.PageRequest{
 			Offset:     0,
 			Limit:      1000,
 			CountTotal: true,

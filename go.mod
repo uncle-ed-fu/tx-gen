@@ -13,6 +13,7 @@ require (
 	github.com/celestiaorg/celestia-app v0.5.1
 	github.com/celestiaorg/nmt v0.8.0
 	github.com/cosmos/cosmos-sdk v0.46.0-beta2.0.20220418184507-c53157dd63f6
+	github.com/montanaflynn/stats v0.6.6
 	github.com/spf13/cobra v1.4.0
 	github.com/tendermint/tendermint v0.35.4
 	google.golang.org/grpc v1.46.0
@@ -103,7 +104,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
-	github.com/montanaflynn/stats v0.6.6 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20210609091139-0a56a4bca00b // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
