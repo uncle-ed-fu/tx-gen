@@ -60,7 +60,7 @@ func FundCmd() *cobra.Command {
 		},
 	}
 
-	command.Flags().Int64("amount", 10000, "amount of utia to send to each recipient")
+	command.Flags().Int64("amount", 100000, "amount of utia to send to each recipient")
 	command.Flags().Int("count", 1, "number of times to repeat")
 
 	return command
@@ -105,7 +105,7 @@ func generateSignedSendTxs(clientCtx client.Context, count int, amount int64, rs
 
 			feeCoin := sdk.Coin{
 				Denom:  app.BondDenom,
-				Amount: sdk.NewInt(1),
+				Amount: sdk.NewInt(1000000),
 			}
 
 			opts := []types.TxBuilderOption{
