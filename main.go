@@ -22,7 +22,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/spf13/cobra"
 )
@@ -40,13 +39,7 @@ func init() {
 
 func main() {
 
-	encodingConfig := encoding.MakeEncodingConfig(app.ModuleEncodingRegisters...)
-
-	cfg := sdk.GetConfig()
-	cfg.SetBech32PrefixForAccount(app.Bech32PrefixAccAddr, app.Bech32PrefixAccPub)
-	cfg.SetBech32PrefixForValidator(app.Bech32PrefixValAddr, app.Bech32PrefixValPub)
-	cfg.SetBech32PrefixForConsensusNode(app.Bech32PrefixConsAddr, app.Bech32PrefixConsPub)
-	cfg.Seal()
+	encodingConfig := encoding.MakeConfig(app.ModuleEncodingRegisters...)
 
 	initClientCtx := client.Context{}.
 		WithCodec(encodingConfig.Codec).
@@ -103,7 +96,7 @@ func main() {
 	}
 
 	rootCmd.PersistentFlags().String(flags.FlagNode, "tcp://localhost:26657", "")
-	rootCmd.PersistentFlags().String(flags.FlagChainID, "mamaki", "")
+	rootCmd.PersistentFlags().String(flags.FlagChainID, "mocha", "")
 
 	rootCmd.PersistentFlags().String(flags.FlagHome, defaultKeyHome, "The application home directory")
 	rootCmd.PersistentFlags().String(flags.FlagKeyringDir, defaultKeyHome, "The client Keyring directory; if omitted, the default 'home' directory will be used")
@@ -112,10 +105,10 @@ func main() {
 
 	rootCmd.AddCommand(
 		accounts.InitCmd(),
+		accounts.PrintAccountsCmd(),
 		fund.FundCmd(),
 		txs.GenPayForDataCmd(),
 		keys.Commands(defaultKeyHome),
-		txs.PayForPhotoCmd(),
 		history.HistoryCmd(),
 		profile.ProfileCmd(),
 	)

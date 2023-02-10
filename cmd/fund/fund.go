@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/celestiaorg/celestia-app/app"
-	"github.com/celestiaorg/celestia-app/x/payment/types"
+	"github.com/celestiaorg/celestia-app/x/blob/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"

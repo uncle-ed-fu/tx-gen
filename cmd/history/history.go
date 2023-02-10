@@ -49,11 +49,11 @@ func readStartEndFlags(cmd *cobra.Command, cctx client.Context) (start, end int6
 	}
 
 	if end < 0 {
-		res, err := cctx.Client.Header(cmd.Context(), nil)
+		res, err := cctx.Client.Block(cmd.Context(), nil)
 		if err != nil {
 			return 0, 0, err
 		}
-		end = res.Header.Height
+		end = res.Block.Height
 	}
 	return
 }

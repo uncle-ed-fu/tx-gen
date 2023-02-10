@@ -9,7 +9,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/tendermint/rpc/coretypes"
+	rpctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 func ProfileCmd() *cobra.Command {
@@ -28,8 +28,8 @@ func ProfileCmd() *cobra.Command {
 			}
 			defer file.Close()
 
-			var lastStatusResp *coretypes.ResultStatus
-			var lastNetInfo *coretypes.ResultNetInfo
+			var lastStatusResp *rpctypes.ResultStatus
+			var lastNetInfo *rpctypes.ResultNetInfo
 			for {
 				ctx, _ := context.WithTimeout(cmd.Context(), time.Second*1)
 				netInfo, err := cctx.Client.NetInfo(ctx)
