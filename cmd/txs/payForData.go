@@ -12,8 +12,8 @@ import (
 
 func GenPayForDataCmd() *cobra.Command {
 	command := &cobra.Command{
-		Use:   "pfd",
-		Short: "generate sdk transactions",
+		Use:   "pfb",
+		Short: "generate blob transactions",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cctx, err := client.GetClientTxContext(cmd)
 			if err != nil {
