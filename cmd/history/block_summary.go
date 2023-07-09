@@ -3,11 +3,10 @@ package history
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	cosmosquery "github.com/cosmos/cosmos-sdk/types/query"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/pomifer/tx-gen/query"
@@ -24,11 +23,6 @@ func BlockSummaryCmd() *cobra.Command {
 				return err
 			}
 
-			chainID, err := cmd.Flags().GetString(flags.FlagChainID)
-			if err != nil {
-				return err
-			}
-
 			start, end, err := readStartEndFlags(cmd, cctx)
 			if err != nil {
 				return err
@@ -40,20 +34,18 @@ func BlockSummaryCmd() *cobra.Command {
 			}
 
 			summaries := []query.BlockSummary{}
+			var lastTime time.Time
 			for i := start; i < end; i++ {
 				res, err := cctx.Client.Block(cmd.Context(), &i)
 				if err != nil {
 					return err
 				}
 
-				valAddr, err := sdk.ConsAddressFromHex(res.Block.ProposerAddress.String())
-				if err != nil {
-					return err
-				}
+				valAddr := res.Block.ProposerAddress.String()
 
-				valName, has := valMap[valAddr.String()]
+				valName, has := valMap[valAddr]
 				if !has {
-					valName = valAddr.String()
+					valName = valAddr
 				}
 
 				signers, missedSigners := query.ParseSigners(valMap, res.Block)
@@ -64,27 +56,61 @@ func BlockSummaryCmd() *cobra.Command {
 					Signers:       signers,
 					MissedSigners: missedSigners,
 					Time:          res.Block.Time,
+					Round:         int(res.Block.LastCommit.Round),
 				}
 
 				summaries = append(summaries, bs)
 
-				fmt.Printf("%d - %d - %s\n", res.Block.Height, res.Block.Time.UnixMilli(), valName)
-			}
+				proposer, has := valMap[res.Block.ProposerAddress.String()]
+				if !has {
+					proposer = res.Block.ProposerAddress.String()
+				}
+				if proposer == "" {
+					proposer = "nil prop" + res.Block.ProposerAddress.String()
+				}
 
-			overallSummary, summaries := query.SummarizeBlocks(summaries...)
+				fmt.Printf(
+					"%d - rounds %d diff seconds %.2f ### %v\n",
+					res.Block.Height,
+					res.Block.LastCommit.Round,
+					res.Block.Time.Sub(lastTime).Seconds(),
+					proposer,
+				)
+				lastTime = res.Block.Time
+			}
+			fmt.Println("-----------------------------------------   summary")
+			overallSummary, _ := query.SummarizeBlocks(summaries...)
 			fmt.Printf(
-				"avg %.2f median %.2f stdDev %.2f shortest %.2f longest %.2f\n",
+				"Block times (seconds): avg %.2f stdDev %.2f shortest %.2f longest %.2f \n",
 				overallSummary.AverageBlockTime,
-				overallSummary.MedianBlockTime,
 				overallSummary.StandardDeviationBlockTime,
 				overallSummary.ShortestBlockTime,
-				overallSummary.LongestBlockTime)
-
-			err = saveJson(fmt.Sprintf("blocks-%d-%d-%s.json", start, end, chainID), summaries)
-			if err != nil {
-				return err
+				overallSummary.LongestBlockTime,
+			)
+			fmt.Printf(
+				"multi-round heights %d proposer repeats %d \n",
+				overallSummary.MultiRoundHeights,
+				overallSummary.ProposerRepeats,
+			)
+			fmt.Printf(
+				"percent multi-round heights %.2f\n",
+				float64(overallSummary.MultiRoundHeights)/float64(len(summaries)),
+			)
+			fmt.Println("----------------------------------------- proposer tally")
+			for proposer, tally := range overallSummary.ProposerTally {
+				fmt.Println(proposer, tally)
 			}
-			return saveJson(fmt.Sprintf("total-summary-%d-%d-%s.json", start, end, chainID), overallSummary)
+			fmt.Println("-----------------------------------------   signer tally", "total", len(summaries))
+			for signer, tally := range overallSummary.SignerTally {
+				fmt.Println(signer, tally, "missed", len(summaries)-int(tally))
+			}
+			// err = saveJson(fmt.Sprintf("blocks-%d-%d-%s.json", start, end, chainID), summaries)
+			// if err != nil {
+			// 	return err
+			// }
+
+			// saveJson(fmt.Sprintf("total-summary-%d-%d-%s.json", start, end, chainID), overallSummary)
+			return nil
 		},
 	}
 
@@ -115,11 +141,8 @@ func queryValidators(ctx context.Context, cctx client.Context) (map[string]strin
 		if err != nil {
 			return nil, err
 		}
-		conAddr, err := sdk.ConsAddressFromHex(pubKey.Address().String())
-		if err != nil {
-			return nil, err
-		}
-		out[conAddr.String()] = v.Description.Moniker
+		conAddr := pubKey.Address().String() // sdk.ConsAddressFromHex(pubKey.Address().String())
+		out[conAddr] = v.Description.Moniker
 	}
 	return out, nil
 }

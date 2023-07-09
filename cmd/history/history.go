@@ -24,7 +24,10 @@ func HistoryCmd() *cobra.Command {
 	command.PersistentFlags().Int64(EndFlag, -1, "last block to query")
 	command.PersistentFlags().String(SaveFlag, "", "path to save json file to")
 
-	command.AddCommand(BlockSummaryCmd())
+	command.AddCommand(
+		BlockSummaryCmd(),
+		BlockTimesCmd(),
+	)
 
 	return command
 }

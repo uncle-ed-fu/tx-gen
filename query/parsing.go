@@ -4,7 +4,6 @@ import (
 	"sort"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/montanaflynn/stats"
 	coretypes "github.com/tendermint/tendermint/types"
 )
@@ -17,6 +16,7 @@ type BlockSummary struct {
 	MissedSigners      int64           `json:"missed_signers"`
 	Time               time.Time       `json:"time"`
 	TimeSinceLastBlock float64         `json:"tslb"`
+	Round              int             `json:"round"`
 }
 
 type ChainSummary struct {
@@ -35,6 +35,8 @@ type ChainSummary struct {
 	ProposerRepeats      int             `json:"proposer_repeats"`
 	SignerTally          map[string]uint // not including these as json atm
 	ProposerTally        map[string]uint
+	// MultiRoundHeights is the number of rounds that required greater than 1 round to reach consensus
+	MultiRoundHeights int `json:"multi_round_heights"`
 }
 
 func ParseSigners(valNames map[string]string, block *coretypes.Block) (map[string]bool, int64) {
@@ -45,14 +47,12 @@ func ParseSigners(valNames map[string]string, block *coretypes.Block) (map[strin
 			missedSigners++
 			continue
 		}
-		valAddr, err := sdk.ConsAddressFromHex(sig.ValidatorAddress.String())
-		if err != nil {
-			panic(err)
-		}
 
-		valName, has := valNames[valAddr.String()]
+		valAddr := sig.ValidatorAddress.String()
+
+		valName, has := valNames[valAddr]
 		if !has {
-			valName = valAddr.String()
+			valName = valAddr
 		}
 
 		switch sig.BlockIDFlag {
@@ -84,9 +84,9 @@ func SummarizeBlocks(blocks ...BlockSummary) (ChainSummary, []BlockSummary) {
 	proposerTally := make(map[string]uint)
 
 	proposerRepeats := 0
+	multiRoundHeights := 0
 
 	lastProposer := ""
-	secondLastProposer := ""
 	for i, b := range blocks {
 		// get the time difference
 		if i != 0 {
@@ -104,12 +104,14 @@ func SummarizeBlocks(blocks ...BlockSummary) (ChainSummary, []BlockSummary) {
 		proposerTally[b.Proposer]++
 
 		// count the number of times we have the same proposer 3 times in a row
-		if b.Proposer == lastProposer && lastProposer == secondLastProposer {
+		if b.Proposer == lastProposer {
 			proposerRepeats++
 		}
 
-		secondLastProposer = lastProposer
 		lastProposer = b.Proposer
+		if b.Round > 0 {
+			multiRoundHeights++
+		}
 	}
 
 	return ChainSummary{
@@ -124,6 +126,7 @@ func SummarizeBlocks(blocks ...BlockSummary) (ChainSummary, []BlockSummary) {
 		SignerTally:                signerTally,
 		ProposerTally:              proposerTally,
 		ProposerRepeats:            proposerRepeats,
+		MultiRoundHeights:          multiRoundHeights,
 	}, blocks
 }
 

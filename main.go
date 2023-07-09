@@ -13,7 +13,6 @@ import (
 	"github.com/pomifer/tx-gen/cmd/fund"
 	"github.com/pomifer/tx-gen/cmd/history"
 	"github.com/pomifer/tx-gen/cmd/profile"
-	"github.com/pomifer/tx-gen/cmd/txs"
 	"github.com/tendermint/tendermint/libs/cli"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -96,7 +95,7 @@ func main() {
 	}
 
 	rootCmd.PersistentFlags().String(flags.FlagNode, "tcp://localhost:26657", "")
-	rootCmd.PersistentFlags().String(flags.FlagChainID, "mocha", "")
+	rootCmd.PersistentFlags().String(flags.FlagChainID, "mocha-3", "")
 
 	rootCmd.PersistentFlags().String(flags.FlagHome, defaultKeyHome, "The application home directory")
 	rootCmd.PersistentFlags().String(flags.FlagKeyringDir, defaultKeyHome, "The client Keyring directory; if omitted, the default 'home' directory will be used")
@@ -107,7 +106,6 @@ func main() {
 		accounts.InitCmd(),
 		accounts.PrintAccountsCmd(),
 		fund.FundCmd(),
-		txs.GenPayForDataCmd(),
 		keys.Commands(defaultKeyHome),
 		history.HistoryCmd(),
 		profile.ProfileCmd(),

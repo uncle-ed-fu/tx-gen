@@ -1,5 +1,0 @@
-package decode
-
-func decode() {
-
-}
